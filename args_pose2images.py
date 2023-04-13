@@ -140,6 +140,7 @@ if __name__ == '__main__':
         cap = cv2.VideoCapture(arg.video)
         length = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
         print(f"Totol frame: {length}")
+        print(f"seed: {seed}")
         _output_video = os.path.join(os.path.dirname(__file__), f"output.mp4")
 
         img_width = int(cap.get(3))
@@ -147,9 +148,11 @@ if __name__ == '__main__':
         size = (img_width, img_height)
         fourcc = cv2.VideoWriter_fourcc(*'mp4v')
         videoWrite = cv2.VideoWriter(_output_video, fourcc, 30, size)
+        count = 0
         while (cap.isOpened()):
             # Capture frame-by-frame
             ret, frame = cap.read()
+            count +=1
             if ret:
                 kwargs = {
                     "input_image": frame,
@@ -169,8 +172,11 @@ if __name__ == '__main__':
                 result = process(**kwargs)
                 output = Image.fromarray(result[0])
                 videoWrite.write(output)
+                if count > int(length/3):
+                    break
             else:
                 break
+            videoWrite.release()
     else:
         raise NotImplementedError("Choose --images or --video")
 # block = gr.Blocks().queue()
