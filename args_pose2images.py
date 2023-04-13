@@ -102,10 +102,7 @@ def parse_args():
     parser.add_argument('--scale', type=int, default=9)
     parser.add_argument('--seed', type=int)
     parser.add_argument('--eta', type=int, default=0.0)
-    """
-    output_format: xxx.mp4('MP4V'), xxx.mkv('FMP4'), xxx.flv('FLV1'), xxx.avi('XIVD')
-    ps. ffmpeg -i xxx.mkv -c:v libx264 -strict -2 xxxx.mp4, this command can convert mkv to mp4, which has small size.
-    """
+
     return parser.parse_args()
 
 
@@ -135,8 +132,8 @@ if __name__ == '__main__':
             "eta": arg.eta
         }
 
-        # process(**kwargs)
-        print(f'kwargs: {kwargs}')
+        result = process(**kwargs)
+        print(f'result: {result}')
 
 # block = gr.Blocks().queue()
 # with block:
