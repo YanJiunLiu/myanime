@@ -19,6 +19,7 @@ import random
 import argparse
 from PIL import Image
 from numpy import asarray
+import os
 
 apply_openpose = OpenposeDetector()
 
@@ -135,7 +136,33 @@ if __name__ == '__main__':
         result = process(**kwargs)
         output = Image.fromarray(result[0])
         output.save(f"output.png")
-
+    elif arg.video:
+        cap = cv2.VideoCapture(arg.video)
+        _output_video = os.path.join(os.path.dirname(__file__), f"output.mp4")
+        while (cap.isOpened()):
+            # Capture frame-by-frame
+            ret, frame = cap.read()
+            if ret:
+                kwargs = {
+                    "input_image": frame,
+                    "prompt": arg.prompt,
+                    "a_prompt": arg.a_prompt,
+                    "n_prompt": arg.n_prompt,
+                    "num_samples": arg.num_samples,
+                    "image_resolution": arg.image_resolution,
+                    "detect_resolution": arg.detect_resolution,
+                    "ddim_steps": arg.ddim_steps,
+                    "guess_mode": arg.guess_mode,
+                    "strength": arg.strength,
+                    "scale": arg.scale,
+                    "seed": seed,
+                    "eta": arg.eta
+                }
+                result = process(**kwargs)
+            else:
+                break
+    else:
+        raise NotImplementedError("Choose --images or --video")
 # block = gr.Blocks().queue()
 # with block:
 #     with gr.Row():
