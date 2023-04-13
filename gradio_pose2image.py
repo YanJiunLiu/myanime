@@ -1,29 +1,34 @@
 from share import *
-import config
+from cldm.hack import hack_everything
 
+
+hack_everything(clip_skip=2)
+
+
+import config
 import cv2
 import einops
 import gradio as gr
 import numpy as np
 import torch
-import random
 
 from pytorch_lightning import seed_everything
 from annotator.util import resize_image, HWC3
 from annotator.openpose import OpenposeDetector
 from cldm.model import create_model, load_state_dict
-from cldm.ddim_hacked import DDIMSampler
-
+from ldm.models.diffusion.ddim import DDIMSampler
+import random
 
 apply_openpose = OpenposeDetector()
 
 model = create_model('./models/cldm_v15.yaml').cpu()
-model.load_state_dict(load_state_dict('./models/control_sd15_openpose.pth', location='cuda'))
-model = model.cuda()
+model.load_state_dict(load_state_dict('./models/control_any3_openpose.pth', location='cpu'))
+model.cpu()
 ddim_sampler = DDIMSampler(model)
 
 
 def process(input_image, prompt, a_prompt, n_prompt, num_samples, image_resolution, detect_resolution, ddim_steps, guess_mode, strength, scale, seed, eta):
+    print(input_image, prompt, a_prompt, n_prompt, num_samples, image_resolution, detect_resolution, ddim_steps, guess_mode, strength, scale, seed, eta)
     with torch.no_grad():
         input_image = HWC3(input_image)
         detected_map, _ = apply_openpose(resize_image(input_image, detect_resolution))
@@ -33,7 +38,7 @@ def process(input_image, prompt, a_prompt, n_prompt, num_samples, image_resoluti
 
         detected_map = cv2.resize(detected_map, (W, H), interpolation=cv2.INTER_NEAREST)
 
-        control = torch.from_numpy(detected_map.copy()).float().cuda() / 255.0
+        control = torch.from_numpy(detected_map.copy()).float().cpu() / 255.0
         control = torch.stack([control for _ in range(num_samples)], dim=0)
         control = einops.rearrange(control, 'b h w c -> b c h w').clone()
 
@@ -91,6 +96,7 @@ with block:
                                       value='longbody, lowres, bad anatomy, bad hands, missing fingers, extra digit, fewer digits, cropped, worst quality, low quality')
         with gr.Column():
             result_gallery = gr.Gallery(label='Output', show_label=False, elem_id="gallery").style(grid=2, height='auto')
+
     ips = [input_image, prompt, a_prompt, n_prompt, num_samples, image_resolution, detect_resolution, ddim_steps, guess_mode, strength, scale, seed, eta]
     run_button.click(fn=process, inputs=ips, outputs=[result_gallery])
 
