@@ -133,7 +133,7 @@ if __name__ == '__main__':
         }
 
         result = process(**kwargs)
-        output = Image.fromarray(result)
+        output = Image.fromarray(result[0])
         output.save(f"output.png")
 
 # block = gr.Blocks().queue()
