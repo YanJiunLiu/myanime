@@ -138,7 +138,14 @@ if __name__ == '__main__':
         output.save(f"output.png")
     elif arg.video:
         cap = cv2.VideoCapture(arg.video)
+        length = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
         _output_video = os.path.join(os.path.dirname(__file__), f"output.mp4")
+
+        img_width = int(cap.get(3))
+        img_height = int(cap.get(4))
+        size = (img_width, img_height)
+        fourcc = cv2.VideoWriter_fourcc(*'mp4v')
+        videoWrite = cv2.VideoWriter(_output_video, fourcc, 30, size)
         while (cap.isOpened()):
             # Capture frame-by-frame
             ret, frame = cap.read()
@@ -159,6 +166,8 @@ if __name__ == '__main__':
                     "eta": arg.eta
                 }
                 result = process(**kwargs)
+                output = Image.fromarray(result[0])
+                videoWrite.write(output)
             else:
                 break
     else:
