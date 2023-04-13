@@ -18,9 +18,9 @@ from share import *
 from cldm.model import load_state_dict
 
 
-sd15_state_dict = load_state_dict(path_sd15)
+
+
 sd15_with_control_state_dict = load_state_dict(path_sd15_with_control)
-input_state_dict = load_state_dict(path_input)
 
 
 def get_node_name(name, parent_name):
@@ -33,23 +33,46 @@ def get_node_name(name, parent_name):
 
 
 keys = sd15_with_control_state_dict.keys()
+input_state_dict_selected = {}
+input_state_dict = load_state_dict(path_input)
+for key in keys:
+    is_control, node_name = get_node_name(key, 'control_')
+    if is_control:
+        sd15_key_name = 'model.diffusion_' + node_name
+    else:
+        sd15_key_name = key
+
+    input_state_dict_selected[sd15_key_name] = input_state_dict[sd15_key_name]
+del input_state_dict
+
+sd15_state_dict_selected ={}
+sd15_state_dict = load_state_dict(path_sd15)
+for key in keys:
+    is_control, node_name = get_node_name(key, 'control_')
+    if is_control:
+        sd15_key_name = 'model.diffusion_' + node_name
+    else:
+        sd15_key_name = key
+
+    sd15_state_dict_selected[sd15_key_name] = sd15_state_dict[sd15_key_name]
+del sd15_state_dict
+
 
 final_state_dict = {}
 for key in keys:
     is_first_stage, _ = get_node_name(key, 'first_stage_model')
     is_cond_stage, _ = get_node_name(key, 'cond_stage_model')
     if is_first_stage or is_cond_stage:
-        final_state_dict[key] = input_state_dict[key]
+        final_state_dict[key] = input_state_dict_selected[key]
         continue
     p = sd15_with_control_state_dict[key]
-    del sd15_with_control_state_dict
     is_control, node_name = get_node_name(key, 'control_')
     if is_control:
         sd15_key_name = 'model.diffusion_' + node_name
     else:
         sd15_key_name = key
-    if sd15_key_name in input_state_dict:
-        p_new = p + input_state_dict[sd15_key_name] - sd15_state_dict[sd15_key_name]
+    if sd15_key_name in input_state_dict_selected:
+        p_new = p + input_state_dict_selected[sd15_key_name] - sd15_state_dict_selected[sd15_key_name]
         # print(f'Offset clone from [{sd15_key_name}] to [{key}]')
     else:
         p_new = p
