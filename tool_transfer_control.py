@@ -3,22 +3,16 @@ path_sd15_with_control = './models/control_sd15_openpose.pth'
 path_input = './models/AnythingV5V3_v5PrtRE.safetensors'
 path_output = './models/control_any3_openpose.pth'
 
-
 import os
-
 
 assert os.path.exists(path_sd15), 'Input path_sd15 does not exists!'
 assert os.path.exists(path_sd15_with_control), 'Input path_sd15_with_control does not exists!'
 assert os.path.exists(path_input), 'Input path_input does not exists!'
 assert os.path.exists(os.path.dirname(path_output)), 'Output folder not exists!'
 
-
 import torch
 from share import *
 from cldm.model import load_state_dict
-
-
-
 
 sd15_with_control_state_dict = load_state_dict(path_sd15_with_control)
 
@@ -41,11 +35,11 @@ for key in keys:
         sd15_key_name = 'model.diffusion_' + node_name
     else:
         sd15_key_name = key
-
-    input_state_dict_selected[sd15_key_name] = input_state_dict[sd15_key_name]
+    if sd15_key_name in input_state_dict_selected:
+        input_state_dict_selected[sd15_key_name] = input_state_dict[sd15_key_name]
 del input_state_dict
 
-sd15_state_dict_selected ={}
+sd15_state_dict_selected = {}
 sd15_state_dict = load_state_dict(path_sd15)
 for key in keys:
     is_control, node_name = get_node_name(key, 'control_')
@@ -53,10 +47,9 @@ for key in keys:
         sd15_key_name = 'model.diffusion_' + node_name
     else:
         sd15_key_name = key
-
-    sd15_state_dict_selected[sd15_key_name] = sd15_state_dict[sd15_key_name]
+    if sd15_key_name in input_state_dict_selected:
+        sd15_state_dict_selected[sd15_key_name] = sd15_state_dict[sd15_key_name]
 del sd15_state_dict
-
 
 final_state_dict = {}
 for key in keys:
