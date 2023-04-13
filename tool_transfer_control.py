@@ -42,6 +42,7 @@ for key in keys:
         final_state_dict[key] = input_state_dict[key]
         continue
     p = sd15_with_control_state_dict[key]
+    del sd15_with_control_state_dict
     is_control, node_name = get_node_name(key, 'control_')
     if is_control:
         sd15_key_name = 'model.diffusion_' + node_name
