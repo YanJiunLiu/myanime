@@ -75,7 +75,7 @@ def process(input_image, prompt, a_prompt, n_prompt, num_samples, image_resoluti
             np.uint8)
 
         results = [x_samples[i] for i in range(num_samples)]
-    return [detected_map] + results
+    return results
 
 
 def parse_args():
@@ -133,7 +133,8 @@ if __name__ == '__main__':
         }
 
         result = process(**kwargs)
-        print(f'result: {result}')
+        output = Image.fromarray(result)
+        output.save(f"output.png")
 
 # block = gr.Blocks().queue()
 # with block:
