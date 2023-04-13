@@ -42,6 +42,12 @@ del input_state_dict
 sd15_state_dict_selected = {}
 sd15_state_dict = load_state_dict(path_sd15)
 for key in keys:
+    is_first_stage, _ = get_node_name(key, 'first_stage_model')
+    is_cond_stage, _ = get_node_name(key, 'cond_stage_model')
+    if is_first_stage or is_cond_stage:
+        input_state_dict_selected[key] = sd15_state_dict[key]
+        continue
+
     is_control, node_name = get_node_name(key, 'control_')
     if is_control:
         sd15_key_name = 'model.diffusion_' + node_name
