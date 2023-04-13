@@ -169,7 +169,9 @@ if __name__ == '__main__':
                     "eta": arg.eta
                 }
                 result = process(**kwargs)
-                # output = Image.fromarray(result[0])
+
+                output = Image.fromarray(result[0])
+                output.save(f"ouput_image/output-{count}.png")
                 videoWrite.write(result[0])
                 if count % 500 == 0:
                     videoWrite.release()
