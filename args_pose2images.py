@@ -139,6 +139,7 @@ if __name__ == '__main__':
     elif arg.video:
         cap = cv2.VideoCapture(arg.video)
         length = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+        print(f"Totol frame: {length}")
         _output_video = os.path.join(os.path.dirname(__file__), f"output.mp4")
 
         img_width = int(cap.get(3))
